@@ -2,6 +2,10 @@ import os
 from flask import Flask, jsonify, send_from_directory
 import sqlite3
 
+if os.environ.get("IMPORT_ON_START", "false").lower() == "true":
+    import import_excel_to_db
+    print("Excel imported into SQLite before server start.")
+
 app = Flask(__name__, static_folder="static")
 
 def get_data(table_name):

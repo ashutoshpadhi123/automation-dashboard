@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Testing Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 35%, #475569 100%);
+            min-height: 100vh;
+            color: #1e293b;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 50px;
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transform: translateY(0);
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Toggle Controls */
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .toggle-wrapper {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transform: translateZ(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toggle-wrapper:hover {
+            transform: translateY(-2px) translateZ(0);
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .toggle-buttons {
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 2;
+            letter-spacing: 0.025em;
+        }
+
+        .toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            opacity: 0;
+            border-radius: 8px;
+            transform: scale(0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .toggle-btn.active::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .toggle-btn.active {
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+
+        .toggle-btn:hover:not(.active) {
+            color: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+        }
+
+        .toggle-btn:hover:not(.active)::before {
+            opacity: 0.3;
+            transform: scale(0.95);
+        }
+
+        /* View sections */
+        .view-section {
+            display: none;
+            animation: slideInContent 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes slideInContent {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px) scale(0.98);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transform: translateZ(0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .section-header:hover {
+            transform: translateY(-3px) translateZ(0);
+            box-shadow: 
+                0 35px 70px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .section-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.025em;
+        }
+
+        .section-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateZ(0);
+            animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation-fill-mode: both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .chart-container:hover {
+            transform: translateY(-8px) scale(1.02) translateZ(0);
+            box-shadow: 
+                0 40px 80px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .chart-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #ffffff;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: -0.015em;
+        }
+
+        .bar-chart {
+            margin: 20px 0;
+        }
+
+        .bar-group {
+            margin-bottom: 15px;
+        }
+
+        .bar-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .bar-container span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .bar {
+            height: 28px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            min-width: 35px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bar:hover::before {
+            left: 100%;
+        }
+
+        .bar:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .bar-automated { 
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .bar-manual { 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        .bar-for-auto { 
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        .bar-total { 
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .bar-target { 
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .bar-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-top: 35px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 30px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateZ(0);
+            animation: slideInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.05) translateZ(0);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.85;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+        }
+
+        .chart-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 15px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .bar-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .toggle-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Automation Testing Dashboard</h1>
+        
+        <!-- Toggle Controls -->
+        <div class="toggle-container">
+            <div class="toggle-wrapper">
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" onclick="showView('ui')" id="ui-toggle">
+                        📱 UI Automation
+                    </button>
+                    <button class="toggle-btn" onclick="showView('api')" id="api-toggle">
+                        🔌 API Automation
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            Loading and processing automation data...
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <!-- UI Automation Section -->
+            <div id="ui-view" class="view-section active">
+                <div class="section-header">
+                    <h2 class="section-title">UI Automation Analysis</h2>
+                    <p>Comprehensive view of UI automation coverage across products and test types</p>
+                </div>
+
+                <div class="dashboard-grid" id="ui-charts"></div>
+
+                <!-- UI Summary Statistics -->
+                <div class="section-header">
+                    <h2 class="section-title">UI Summary Statistics</h2>
+                    <div class="stats-grid" id="ui-stats"></div>
+                </div>
+            </div>
+
+            <!-- API Automation Section -->
+            <div id="api-view" class="view-section">
+                <div class="section-header">
+                    <h2 class="section-title">API Automation Analysis</h2>
+                    <p>API automation progress and coverage by application</p>
+                </div>
+
+                <div class="dashboard-grid" id="api-charts"></div>
+
+                <!-- API Summary Statistics -->
+                <div class="section-header">
+                    <h2 class="section-title">API Summary Statistics</h2>
+                    <div class="stats-grid" id="api-stats"></div>
+                </div>
+            </div>">
+
+            <!-- API Automation Section -->
+            <div id="api-view" class="view-section">
+                <div class="section-header">
+                    <h2 class="section-title">🔌 API Automation Analysis</h2>
+                    <p>API automation progress and coverage by application</p>
+                </div>
+
+                <div class="dashboard-grid" id="api-charts"></div>
+
+                <!-- API Summary Statistics -->
+                <div class="section-header">
+                    <h2 class="section-title">📊 API Summary Statistics</h2>
+                    <div class="stats-grid" id="api-stats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let uiData = [];
+        let apiData = [];
+
+        // Toggle functionality
+        function showView(view) {
+            const uiView = document.getElementById('ui-view');
+            const apiView = document.getElementById('api-view');
+            const uiToggle = document.getElementById('ui-toggle');
+            const apiToggle = document.getElementById('api-toggle');
+
+            // Remove active classes
+            uiView.classList.remove('active');
+            apiView.classList.remove('active');
+            uiToggle.classList.remove('active');
+            apiToggle.classList.remove('active');
+
+            // Add active class to selected view
+            if (view === 'ui') {
+                uiView.classList.add('active');
+                uiToggle.classList.add('active');
+            } else {
+                apiView.classList.add('active');
+                apiToggle.classList.add('active');
+            }
+        }
+
+        // Sample data structure - replace with your actual data
+        const uiAutomationData = `Product,Suite,Total,Manual,For Auto,Automated,Automated %,Execution Time,Target For 2025,Completed in 2025,Remarks
+Paymaster,RapidRegression,26,0,0,26,100,1h 20m,,,UI( 2-Smoke 172-Regression)
+Paymaster,Regression,694,353,176,165,48,,180,90,
+Paymaster,Performance,14,0,0,14,100,,,
+Paymaster,Sanity,11,0,0,11,100,7m,,
+ICNT,RapidRegression,17,0,0,17,100,38m,,,end to end scenarios for create and pending test case from master data
+ICNT,Regression,542,188,131,223,63,1h 1m,330,,85- EDC April
+ICNT,Performance,30,0,0,30,100,,,
+ICNT,Sanity,13,0,0,13,100,,,7
+Rules Engine,RapidRegression,40,3,0,37,100,1h,17,
+Rules Engine,Regression,454,365,0,89,100,4h,,
+Rules Engine,Performance,10,0,0,10,100,,,
+Rules Engine,Sanity,7,0,0,7,100,5m,,
+ICT,Sanity,13,0,11,2,,,,
+ICT,RapidRegression,17,0,0,17,100,,147,
+ICT,Regression,108,0,86,22,20,,,
+IFM,RapidRegression,12,0,0,12,100,7.5m,,,Modification as per Global Nav changes
+IFM,Regression,29,29,0,0,0,NA,,
+IFM,Sanity,10,0,0,10,100,6m,,
+ICBR,RapidRegression,35,0,18,17,49,40m,5,,API
+ICBR,Regression,190,121,66,3,0,6m,64,,UI
+ICNS,RapidRegression,50,25,25,0,0,,25,
+ICNS,Regression,761,672,89,0,0,,89,
+ICNS,Sanity,26,0,13,13,0,,13,
+IAM,RapidRegression,46,16,16,14,0,,,
+IAM,Regression,50,50,50,0,0,,,
+IAM,Sanity,16,0,8,8,0,,
+MDM,RapidRegression,12,0,12,0,0,,,
+MDM,Regression,15,0,15,0,0,,,
+MDM,Sanity,27,0,14,14,0,,13`;
+
+        const apiAutomationData = `Application,Total,Automated,2025,Remarks,Assigned To,Execution Time
+ICT,18,10,2,In Progress,Sharth,
+ICBR,32,30,10,Complete,Ashwani,2.5 m
+IAM,20,20,,Complete,Kruthi,
+MDM,12,12,,Complete,Neha,
+RE,16,16,,Complete,Ashutosh,20 m
+ICNS,17,17,,,Meghana,
+ICNT,7,7,7,In Progress,Ashutosh,
+ICNTA,84,65,35,In Progress,Soukya Ashutosh Diego,
+IFM,8,8,,Complete,Meghana,
+ICA,6,,,Pending,Punith,
+RE 2.0,42,0,21,In Progress,Ashutosh`;
+
+        // Simple CSV parser
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] ? values[index].trim() : '';
+                });
+                data.push(row);
+            }
+            
+            return data;
+        }
+
+        // Process data from separate sheets
+        function processData() {
+            console.log('Starting data processing...');
+            
+            try {
+                // Parse UI Automation data
+                const uiParsed = parseCSV(uiAutomationData);
+                console.log('UI Parsed rows:', uiParsed.length);
+
+                // Parse API Automation data
+                const apiParsed = parseCSV(apiAutomationData);
+                console.log('API Parsed rows:', apiParsed.length);
+
+                const uiDataTemp = [];
+                const apiDataTemp = [];
+
+                // Process UI data
+                uiParsed.forEach(row => {
+                    if (row.Product && row.Suite) {
+                        // Calculate correct totals
+                        const manual = parseInt(row.Manual) || 0;
+                        const forAuto = parseInt(row['For Auto']) || 0;
+                        const automated = parseInt(row.Automated) || 0;
+                        const reportedTotal = parseInt(row.Total) || 0;
+                        
+                        // Use calculated total if different from reported
+                        const calculatedTotal = manual + forAuto + automated;
+                        const actualTotal = calculatedTotal > 0 ? calculatedTotal : reportedTotal;
+                        
+                        uiDataTemp.push({
+                            product: row.Product,
+                            suite: row.Suite,
+                            manual: manual,
+                            forAuto: forAuto,
+                            automated: automated,
+                            total: actualTotal,
+                            automatedPercent: actualTotal > 0 ? Math.round((automated / actualTotal) * 100) : 0,
+                            executionTime: row['Execution Time'] || 'N/A',
+                            target2025: parseInt(row['Target For 2025']) || 0,
+                            completed2025: parseInt(row['Completed in 2025']) || 0,
+                            remarks: row.Remarks || ''
+                        });
+                    }
+                });
+
+                // Process API data
+                apiParsed.forEach(row => {
+                    if (row.Application) {
+                        const total = parseInt(row.Total) || 0;
+                        const automated = parseInt(row.Automated) || 0;
+                        
+                        apiDataTemp.push({
+                            application: row.Application,
+                            total: total,
+                            automated: automated,
+                            target2025: parseInt(row['2025']) || 0,
+                            automatedPercent: total > 0 ? Math.round((automated / total) * 100) : 0,
+                            status: row.Remarks || 'Unknown',
+                            assignedTo: row['Assigned To'] || 'Unassigned',
+                            executionTime: row['Execution Time'] || 'N/A'
+                        });
+                    }
+                });
+
+                uiData = uiDataTemp;
+                apiData = apiDataTemp;
+
+                console.log(`UI data: ${uiData.length} records`);
+                console.log(`API data: ${apiData.length} records`);
+                
+                return { uiData, apiData };
+            } catch (error) {
+                console.error('Error processing data:', error);
+                return { uiData: [], apiData: [] };
+            }
+        }
+
+        // Create UI charts
+        function createUICharts(uiData) {
+            const container = document.getElementById('ui-charts');
+            container.innerHTML = ''; // Clear existing content
+            
+            const productGroups = {};
+
+            // Group by product
+            uiData.forEach(item => {
+                if (!productGroups[item.product]) {
+                    productGroups[item.product] = [];
+                }
+                productGroups[item.product].push(item);
+            });
+
+            // Create chart for each product
+            Object.keys(productGroups).forEach(product => {
+                const productData = productGroups[product];
+                const maxValue = Math.max(...productData.map(item => 
+                    Math.max(item.automated, item.manual, item.forAuto)
+                )) || 100;
+
+                const totalTests = productData.reduce((sum, item) => sum + item.total, 0);
+                const totalAutomated = productData.reduce((sum, item) => sum + item.automated, 0);
+                const automationPercent = totalTests > 0 ? Math.round((totalAutomated / totalTests) * 100) : 0;
+
+                const chartHTML = `
+                    <div class="chart-container">
+                        <div class="chart-title">${product} - Test Suite Coverage</div>
+                        
+                        <div class="bar-legend">
+                            <div class="legend-item">
+                                <div class="legend-color bar-automated"></div>
+                                <span>Automated</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color bar-manual"></div>
+                                <span>Manual</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color bar-for-auto"></div>
+                                <span>Ready for Automation</span>
+                            </div>
+                        </div>
+
+                        <div class="bar-chart">
+                            ${productData.map(item => `
+                                <div class="bar-group">
+                                    <div class="bar-label">${item.suite}</div>
+                                    ${item.automated > 0 ? `
+                                        <div class="bar-container">
+                                            <div class="bar bar-automated" style="width: ${(item.automated / maxValue) * 100}%;" title="Automated: ${item.automated}">
+                                                ${item.automated}
+                                            </div>
+                                            <span>Automated</span>
+                                        </div>
+                                    ` : ''}
+                                    ${item.manual > 0 ? `
+                                        <div class="bar-container">
+                                            <div class="bar bar-manual" style="width: ${(item.manual / maxValue) * 100}%;" title="Manual: ${item.manual}">
+                                                ${item.manual}
+                                            </div>
+                                            <span>Manual</span>
+                                        </div>
+                                    ` : ''}
+                                    ${item.forAuto > 0 ? `
+                                        <div class="bar-container">
+                                            <div class="bar bar-for-auto" style="width: ${(item.forAuto / maxValue) * 100}%;" title="Ready for Automation: ${item.forAuto}">
+                                                ${item.forAuto}
+                                            </div>
+                                            <span>Ready for Automation</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="chart-meta">
+                            <div><strong>Total Tests:</strong> ${totalTests}</div>
+                            <div><strong>Automated:</strong> ${totalAutomated}</div>
+                            <div><strong>Coverage:</strong> ${automationPercent}%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${automationPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += chartHTML;
+            });
+        }
+
+        // Create API charts
+        function createAPICharts(apiData) {
+            const container = document.getElementById('api-charts');
+            container.innerHTML = ''; // Clear existing content
+            
+            if (apiData.length === 0) {
+                container.innerHTML = '<div class="chart-container"><div class="chart-title">No API Data Available</div></div>';
+                return;
+            }
+
+            // Group by application for individual widgets
+            const maxValue = Math.max(...apiData.map(item => 
+                Math.max(item.total, item.automated, item.target2025)
+            )) || 100;
+
+            // Create a widget for each application
+            apiData.forEach(item => {
+                const automationPercent = item.total > 0 ? Math.round((item.automated / item.total) * 100) : 0;
+                
+                const chartHTML = `
+                    <div class="chart-container">
+                        <div class="chart-title">${item.application} - API Coverage</div>
+                        
+                        <div class="bar-legend">
+                            <div class="legend-item">
+                                <div class="legend-color bar-total"></div>
+                                <span>Total Tests</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color bar-automated"></div>
+                                <span>Automated</span>
+                            </div>
+                            ${item.target2025 > 0 ? `
+                                <div class="legend-item">
+                                    <div class="legend-color bar-target"></div>
+                                    <span>2025 Target</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="bar-chart">
+                            <div class="bar-group">
+                                <div class="bar-label">Test Coverage</div>
+                                ${item.total > 0 ? `
+                                    <div class="bar-container">
+                                        <div class="bar bar-total" style="width: ${(item.total / maxValue) * 100}%;" title="Total: ${item.total}">
+                                            ${item.total}
+                                        </div>
+                                        <span>Total Tests</span>
+                                    </div>
+                                ` : ''}
+                                ${item.automated > 0 ? `
+                                    <div class="bar-container">
+                                        <div class="bar bar-automated" style="width: ${(item.automated / maxValue) * 100}%;" title="Automated: ${item.automated}">
+                                            ${item.automated}
+                                        </div>
+                                        <span>Automated (${automationPercent}%)</span>
+                                    </div>
+                                ` : ''}
+                                ${item.target2025 > 0 ? `
+                                    <div class="bar-container">
+                                        <div class="bar bar-target" style="width: ${(item.target2025 / maxValue) * 100}%;" title="2025 Target: ${item.target2025}">
+                                            ${item.target2025}
+                                        </div>
+                                        <span>2025 Target</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div class="chart-meta">
+                            <div><strong>Status:</strong> ${item.status}</div>
+                            <div><strong>Assigned To:</strong> ${item.assignedTo}</div>
+                            <div><strong>Coverage:</strong> ${automationPercent}%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${automationPercent}%"></div>
+                        </div>
+                        
+                        ${item.executionTime !== 'N/A' ? `
+                            <div style="text-align: center; margin-top: 10px; color: #666; font-size: 0.9rem;">
+                                <strong>Execution Time:</strong> ${item.executionTime}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                container.innerHTML += chartHTML;
+            });
+        }
+
+        // Create UI summary statistics
+        function createUIStats(uiData) {
+            const container = document.getElementById('ui-stats');
+            container.innerHTML = ''; // Clear existing content
+            
+            const totalUITests = uiData.reduce((sum, item) => sum + item.total, 0);
+            const totalUIAutomated = uiData.reduce((sum, item) => sum + item.automated, 0);
+            const totalUIManual = uiData.reduce((sum, item) => sum + item.manual, 0);
+            const totalUIForAuto = uiData.reduce((sum, item) => sum + item.forAuto, 0);
+            const totalUITarget2025 = uiData.reduce((sum, item) => sum + item.target2025, 0);
+            const uiAutomationPercent = totalUITests > 0 ? Math.round((totalUIAutomated / (totalUIForAuto+totalUIAutomated)) * 100) : 0;
+
+            const stats = [
+                { label: 'Total UI Tests', value: totalUITests.toLocaleString() },
+                { label: 'UI Tests Automated', value: totalUIAutomated.toLocaleString() },
+                { label: 'Manual Tests', value: totalUIManual.toLocaleString() },
+                { label: 'Ready for Automation', value: totalUIForAuto.toLocaleString() },
+                { label: 'Target for 2025', value: totalUITarget2025.toLocaleString() },
+                { label: 'UI Automation %', value: `${uiAutomationPercent}%` },
+                { label: 'Products Covered', value: new Set(uiData.map(item => item.product)).size }
+            ];
+
+            stats.forEach(stat => {
+                const statCard = document.createElement('div');
+                statCard.className = 'stat-card';
+                statCard.innerHTML = `
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                `;
+                container.appendChild(statCard);
+            });
+        }
+
+        // Create API summary statistics
+        function createAPIStats(apiData) {
+            const container = document.getElementById('api-stats');
+            container.innerHTML = ''; // Clear existing content
+            
+            const totalAPITests = apiData.reduce((sum, item) => sum + item.total, 0);
+            const totalAPIAutomated = apiData.reduce((sum, item) => sum + item.automated, 0);
+            const totalAPI2025Target = apiData.reduce((sum, item) => sum + item.target2025, 0);
+            const apiAutomationPercent = totalAPITests > 0 ? Math.round((totalAPIAutomated / totalAPITests) * 100) : 0;
+            const completedApps = apiData.filter(item => item.status === 'Complete').length;
+            const inProgressApps = apiData.filter(item => item.status === 'In Progress').length;
+
+            const stats = [
+                { label: 'Total API Tests', value: totalAPITests.toLocaleString() },
+                { label: 'API Tests Automated', value: totalAPIAutomated.toLocaleString() },
+                { label: '2025 Target', value: totalAPI2025Target.toLocaleString() },
+                { label: 'API Automation %', value: `${apiAutomationPercent}%` },
+                { label: 'API Applications', value: apiData.length },
+                { label: 'Completed Apps', value: completedApps },
+                { label: 'In Progress', value: inProgressApps },
+                { label: 'Average Coverage', value: `${Math.round(apiData.reduce((sum, item) => sum + item.automatedPercent, 0) / apiData.length) || 0}%` }
+            ];
+
+            stats.forEach(stat => {
+                const statCard = document.createElement('div');
+                statCard.className = 'stat-card';
+                statCard.innerHTML = `
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                `;
+                container.appendChild(statCard);
+            });
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            try {
+                const { uiData: processedUIData, apiData: processedAPIData } = processData();
+                
+                if (processedUIData.length === 0 && processedAPIData.length === 0) {
+                    document.getElementById('loading').innerHTML = 'No data found in CSV file';
+                    return;
+                }
+
+                createUICharts(processedUIData);
+                createAPICharts(processedAPIData);
+                createUIStats(processedUIData);
+                createAPIStats(processedAPIData);
+
+                // Show dashboard
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                }, 500);
+
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                document.getElementById('loading').innerHTML = 'Error loading dashboard';
+            }
+        }
+
+        // Start when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+        window.addEventListener('load', initDashboard);
+    </script>
+</body
